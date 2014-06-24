@@ -1,0 +1,10 @@
+<form method="post" action="<?php echo  $this->url->get('session/signup'); ?>">
+	<input type="text" name="first_name" Placeholder="FirstName"/>
+	<input type="text" name="last_name" Placeholder="LastName"/>
+	<input type="text" name="email" Placeholder="Email"/>
+	<input type="text" name="user_name" Placeholder="UserName"/>
+	<input type="password" name="password" Placeholder="password"/>
+	<input type="password" name="confirm_password" Placeholder="ConfirmPassword"/>
+	 <input type="hidden" name="<?php echo $this->security->getTokenKey(); ?>" value="<?php echo $this->security->getToken(); ?>"> 
+	<button type="submit">SignUp</button>
+</form>
