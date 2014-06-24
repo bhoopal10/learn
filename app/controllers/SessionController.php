@@ -66,6 +66,7 @@ class SessionController extends ControllerBase
     		if($this->request->isPost())
     		{
     			print_r($this->request->getPost());
+                $this->view->disable();
     		}
     	}catch (AuthException $e)
     	{
