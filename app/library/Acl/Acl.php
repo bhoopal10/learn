@@ -5,7 +5,7 @@ use Phalcon\Mvc\User\Component;
 use Phalcon\Acl\Adapter\Memory as AclMemory;
 use Phalcon\Acl\Role as AclRole;
 use Phalcon\Acl\Resource as AclResource;
-use Learn\Models\Profiles;
+use Learn\Models\UserGroup;
 
 /**
 * Learn\Acl\Acl
@@ -19,8 +19,9 @@ class Acl extends Component
 * @var \Phalcon\Acl\Adapter\Memory
 */
     private $acl;
+  
 
-    /**
+/**
 * The filepath of the ACL cache file from APP_DIR
 *
 * @var string
@@ -41,7 +42,7 @@ class Acl extends Component
             'delete',
             'changePassword'
         ),
-        'profiles' => array(
+        'UserGroup' => array(
             'index',
             'search',
             'edit',
@@ -132,10 +133,10 @@ class Acl extends Component
     /**
 * Returns the permissions assigned to a profile
 *
-* @param Profiles $profile
+* @param UserGroup $profile
 * @return array
 */
-    public function getPermissions(Profiles $profile)
+    public function getPermissions(UserGroup $profile)
     {
         $permissions = array();
         foreach ($profile->getPermissions() as $permission) {
@@ -181,9 +182,9 @@ class Acl extends Component
         $acl->setDefaultAction(\Phalcon\Acl::DENY);
 
         // Register roles
-        $profiles = Profiles::find('active = "Y"');
+        $UserGroup = UserGroup::find('active = "Y"');
 
-        foreach ($profiles as $profile) {
+        foreach ($UserGroup as $profile) {
             $acl->addRole(new AclRole($profile->name));
         }
 
@@ -192,7 +193,7 @@ class Acl extends Component
         }
 
         // Grant acess to private area to role Users
-        foreach ($profiles as $profile) {
+        foreach ($UserGroup as $profile) {
 
             // Grant permissions in "permissions" model
             foreach ($profile->getPermissions() as $permission) {

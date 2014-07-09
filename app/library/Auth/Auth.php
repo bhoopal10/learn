@@ -24,16 +24,24 @@ class Auth extends Component
     {
 	
         // Check if the user exist
-        $user = Users::findFirstByUsername($credentials['username']);
-        if ($user == false) {
-            $this->registerUserThrottling(0);
-            throw new \Exception ('Wrong email/password combination');
+        $user = Users::findFirstByEmail($credentials['email']);
+        if ($user == false) 
+        {
+            $user = Users::findFirstByUserName($credentials['email']);
+            if($user == false)
+            {
+                $this->registerUserThrottling(0);
+                $this->flash->error('Wrong email/password combination');
+                return false;
+            }
+           
         }
 
         // Check the password
         if (!$this->security->checkHash($credentials['password'], $user->password)) {
             $this->registerUserThrottling($user->id);
-            throw new \Exception('Wrong email/password combination\nPassword1:');
+            $this->flash->error('Wrong email/password combinations');
+            return false;
         }
 
         // Check if the user was flagged
@@ -43,19 +51,20 @@ class Auth extends Component
         $this->saveSuccessLogin($user);
 
         // Check if the remember me was selected
-        if (isset($credentials['remember'])) {
+        if (isset($credentials['remember']))
+         {
             $this->createRememberEnviroment($user);
         }
 
         $this->session->set('auth-identity', array(
             'id' => $user->id,
-            'name' => $user->username,
+            'name' => $user->userName,
             'time'=>time(),
             'logged'=>'true',
-            'profile'=>$user->profile->name
+            'group'=>$user->group->name
         ));
 
-
+        return true;
 
     }
 
@@ -182,7 +191,7 @@ class Auth extends Component
                         $this->session->set('auth-identity', array(
                             'id' => $user->id,
                             'name' => $user->name,
-                            'profile' => $user->profile->name
+                            'group' => $user->group->name
                         ));
 
                         // Register the successful login
@@ -197,7 +206,7 @@ class Auth extends Component
         $this->cookies->get('RMU')->delete();
         $this->cookies->get('RMT')->delete();
 
-        return $this->response->redirect('session/login');
+        return $this->response->redirect('user/index');
     }
 
     /**
@@ -208,15 +217,18 @@ class Auth extends Component
     public function checkUserFlags(Users $user)
     {
         if ($user->active != 'Y') {
-            throw new \Exception('The user is inactive');
+            $this->flash->error('The user is inactive');
+            return false;
         }
 
         if ($user->banned != 'N') {
-            throw new \Exception('The user is banned');
+            $this->flash->error('The user is banned');
+            return false;
         }
 
         if ($user->suspended != 'N') {
-            throw new \Exception('The user is suspended');
+            $this->flash->error('The user is suspended');
+            return false;
         }
     }
 
@@ -257,10 +269,10 @@ class Auth extends Component
     *
     * @return string
     */
-    public function getProfile()
+    public function getGroup()
     {
         $identity = $this->session->get('auth-identity');
-        return $identity['profile'];
+        return $identity['group'];
     }
 
     /**
@@ -295,7 +307,7 @@ class Auth extends Component
         $this->session->set('auth-identity', array(
             'id' => $user->id,
             'name' => $user->name,
-            'profile' => $user->profile->name
+            'group' => $user->group->name
         ));
     }
 

@@ -27,62 +27,24 @@ class ControllerBase extends Controller
      * @param Dispatcher $dispatcher
      * @return boolean
      */
-    public function beforeExecuteRoute(Dispatcher $dispatcher)
+    public function beforeExecuteRoute()
     {
         /*
         check post through csrf security or not
         */
-        if($this->request->isPost())
-        {
-            if (!$this->security->checkToken())
-            {
-                $this->flash->notice('Document Expired');
-                $this->view->disable();
-                return false;
-
-
-            }
-        }
-        $controllerName = $dispatcher->getControllerName();
-
-        // Only check permissions on private controllers
-        if ($this->acl->isPrivate($controllerName)) {
-
-            // Get the current identity
-            $identity = $this->auth->getIdentity();
-
-            // If there is no identity available the user is redirected to index/index
-            if (!is_array($identity)) {
-
-                $this->flash->notice('You don\'t have access to this module: private');
-
-                $dispatcher->forward(array(
-                    'controller' => 'index',
-                    'action' => 'index'
-                ));
-                return false;
-            }
-
-            // Check if the user have permission to the current option
-            $actionName = $dispatcher->getActionName();
-            if (!$this->acl->isAllowed($identity['profile'], $controllerName, $actionName)) {
-
-                $this->flash->notice('You don\'t have access to this module: ' . $controllerName . ':' . $actionName);
-
-                if ($this->acl->isAllowed($identity['profile'], $controllerName, 'index')) {
-                    $dispatcher->forward(array(
-                        'controller' => $controllerName,
-                        'action' => 'index'
-                    ));
-                } else {
-                    $dispatcher->forward(array(
-                        'controller' => 'user_control',
-                        'action' => 'index'
-                    ));
-                }
-
-                return false;
-            }
-        }
+        // if($this->request->isPost())
+        // {
+        //     if (!$this->security->checkToken())
+        //     {
+        //         $this->flash->notice('Document Expired');
+        //         // $this->view->disable();
+        //         return false;
+        //     }
+        // }
+    }
+    public function indexAction()
+    {
+        
+        $this->view->disable();
     }
 }

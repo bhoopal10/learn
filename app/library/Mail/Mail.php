@@ -1,5 +1,5 @@
 <?php
-namespace Unic\Mail;
+namespace Learn\Mail;
 
 use Phalcon\Mvc\User\Component;
 use Swift_Message as Message;
@@ -7,7 +7,7 @@ use Swift_SmtpTransport as Smtp;
 use Phalcon\Mvc\View;
 
 /**
-* Unic\Mail\Mail
+* Learn\Mail\Mail
 * Sends e-mails based on pre-defined templates
 */
 class Mail extends Component

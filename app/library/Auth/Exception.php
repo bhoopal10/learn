@@ -1,5 +1,5 @@
 <?php
-namespace Unic\Auth;
+namespace Learn\Auth;
 
 class Exception extends \Exception
 {

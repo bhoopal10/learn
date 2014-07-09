@@ -14,7 +14,8 @@ use Learn\Auth\Auth,
 	Phalcon\Logger\Adapter\File as Logger,
     Phalcon\Db\Adapter\Pdo\Mysql as Connection,
     Phalcon\Events\Manager as EventManager,
-    Learn\Acl\Acl;
+    Learn\Acl\Acl,
+    Learn\Mail\Mail;
 /**
  * The FactoryDefault Dependency Injector automatically register the right services providing a full stack framework
  */
@@ -112,17 +113,16 @@ $di->set('crypt', function () use ($config) {
     return $crypt;
 });
 
-/**
- * Register the flash service with custom CSS classes
- */
-$di->set('flash', function(){
-        $flash = new Phalcon\Flash\Direct(array(
-                'error' => 'alert alert-error',
-                'success' => 'alert alert-success',
-                'notice' => 'alert alert-info',
+//Set up the flash session service as flash
+$di->set('flash', function() {
+     $flash = new Phalcon\Flash\Session(array(
+                'error'     => 'fadeout alert-danger',
+                'success'   => 'fadeout alert-success',
+                'notice'    => 'fadout alert-info',
         ));
-        return $flash;
+     return $flash;
 });
+
 /*
 	Loading external router
 */
@@ -166,6 +166,12 @@ $di->set('acl', function () {
     return new Acl();
 });
 /**
+ * Mail service uses AmazonSES
+ */
+$di->set('mail', function () {
+    return new Mail();
+});
+/**
  * Assign Array_column
  */
 $di->set('array_column',function(){
@@ -179,5 +185,4 @@ $di->set('security', function(){
     $security->setWorkFactor(12);
 
     return $security;
-}, true);
-
+});

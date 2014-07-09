@@ -4,6 +4,9 @@ namespace Learn\Models;
 
 use Phalcon\Mvc\Model\Validator\Email as Email;
 use Phalcon\Mvc\Model\Validator\Uniqueness as Uniqueness;
+use Learn\Models\ChannelUser;
+use Learn\Auth\Auth;
+
 
 class Users extends \Phalcon\Mvc\Model
 {
@@ -14,6 +17,12 @@ class Users extends \Phalcon\Mvc\Model
      */
     public $id;
 
+     /**
+     *
+     * @var integer
+     */
+    public $user_group_id;
+    
     /**
      *
      * @var string
@@ -52,12 +61,6 @@ class Users extends \Phalcon\Mvc\Model
 
     /**
      *
-     * @var integer
-     */
-    public $profilesId;
-
-    /**
-     *
      * @var string
      */
     public $banned;
@@ -92,11 +95,12 @@ class Users extends \Phalcon\Mvc\Model
                 'message'=>'This username already registered'
                 )
         ));
+
        $this->validate(new Email(
             array(
                 'field'=>'email',
                 'required'=>true,
-                'message'=>'This is invalid email'
+                'message'=>'This is email required'
                 )
         ));
        return $this->validationHasFailed() != true;
@@ -136,11 +140,78 @@ class Users extends \Phalcon\Mvc\Model
             'email' => 'email', 
             'password' => 'password', 
             'mustChangePassword' => 'mustChangePassword', 
-            'profilesId' => 'profilesId', 
             'banned' => 'banned', 
             'suspended' => 'suspended', 
-            'active' => 'active'
+            'active' => 'active',
+            'user_group_id'=>'group_id',
+         
         );
+    }
+
+     /**
+     * Send a confirmation e-mail to the user if the account is not active
+     */
+   
+   /* public function afterSave()
+    {
+        if ($this->active == 'N') {
+
+            $emailConfirmation = new EmailConfirmations();
+
+            $emailConfirmation->usersId = $this->id;
+
+            if ($emailConfirmation->save()) {
+                $this->getDI()
+                    ->getFlash()
+                    ->notice('A confirmation mail has been sent to ' . $this->email);
+            }
+        }
+    }
+    */
+
+    public function beforeSave()
+    {
+        $this->banned='N';
+        $this->suspended='N';
+        $this->mustChangePassword='N';
+    }
+    public function initialize()
+    {
+        $this->belongsTo('group_id','Learn\Models\UserGroup','id',array(
+            'alias'=>'group'));
+        
+    }
+    public function beforeDelete()
+    {
+        if($this->profilesId == '3')
+        {
+            $auth= new Auth();
+            $userId=$auth->getID();
+            //finds channelUser
+            $channelUser=ChannelUser::findFirst("userId = '$this->id'");
+            if($channelUser)
+            {
+                //find channel for right to user
+                $channel=Channel::findFirst("userId = '$userId'");
+                if($channel)
+                {
+                    if($channel->id == $channelUser->channelId)
+                    {
+                         $channelUser->delete();
+                    }
+                    else
+                    {
+                        $this->flash->error('This user Don\'t have rights to delete');
+                        return false;
+                    }
+                }
+            }
+            else
+            {
+                $this->flash->error('This user Don\'t have rights to delete');
+                return false;
+            }
+        }
     }
 
 }
